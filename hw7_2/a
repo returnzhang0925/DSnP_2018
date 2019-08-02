@@ -1,0 +1,10 @@
+task> taski 14610
+Task manager is initialized (14610)
+
+task> taskq -min
+Error: task manager is empty!
+
+task> taskr -n rdevfn
+Error: Task node (rdevfn) does not exist.
+
+task> taskq -ha

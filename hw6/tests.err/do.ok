@@ -1,0 +1,10 @@
+cirr test1.aag
+cirp -pi
+cirp -po
+cirp -fl
+cirp -ne
+cirp -s
+cirg 25
+cirg 25 -fanin 19
+cirw 123.aag
+

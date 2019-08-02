@@ -1,0 +1,9 @@
+cirr opt01.aag
+cirp
+cirp -pi
+cirp -po
+cirp -n
+cirp -fl
+cirsw
+ciropt
+q -f

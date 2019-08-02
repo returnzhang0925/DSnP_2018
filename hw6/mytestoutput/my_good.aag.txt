@@ -1,0 +1,44 @@
+cir> aag 7 2 0 2 3
+Illegal command!! (aag)
+
+cir> 2
+Illegal command!! (2)
+
+cir> 4
+Illegal command!! (4)
+
+cir> 6
+Illegal command!! (6)
+
+cir> 12
+Illegal command!! (12)
+
+cir> 6 13 15
+Illegal command!! (6)
+
+cir> 12 2 4
+Illegal command!! (12)
+
+cir> 14 3 5
+Illegal command!! (14)
+
+cir> i0 x
+Illegal command!! (i0)
+
+cir> i1 y
+Illegal command!! (i1)
+
+cir> o0 s
+Illegal command!! (o0)
+
+cir> o1 c
+Illegal command!! (o1)
+
+cir> c
+Illegal command!! (c)
+
+cir> half adder
+Illegal command!! (half)
+
+cir> 
+cir> 
