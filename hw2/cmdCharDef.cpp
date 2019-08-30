@@ -76,7 +76,7 @@ getChar(istream& istr)
    char ch = mygetc(istr);
 
    if (istr.eof())
-         return returnCh(INPUT_END_KEY);
+      return returnCh(INPUT_END_KEY);
    switch (ch) {
       // Simple keys: one code for one key press
       // -- The following should be platform-independent
@@ -85,7 +85,51 @@ getChar(istream& istr)
       case INPUT_END_KEY:   // Ctrl-d
       case TAB_KEY:         // tab('\t') or Ctrl-i
       case NEWLINE_KEY:     // enter('\n') or ctrl-m
-         return returnCh(ch);
+      // case ESC_KEY:
+      case BACK_SPACE_KEY:
+      // case HOME_KEY:
+      // case END_KEY:
+      // case DELETE_KEY:
+      // case ARROW_UP_KEY:
+      // case ARROW_DOWN_KEY:
+      // case ARROW_RIGHT_KEY:
+      // case ARROW_LEFT_KEY:
+      // case PG_UP_KEY:
+      // case PG_DOWN_KEY:
+      // case INSERT_KEY:
+      return returnCh(ch);
+
+      case ESC_KEY:
+      {
+            char combo = mygetc(istr);
+            // Note: ARROW_KEY_INT == MOD_KEY_INT, so we only check MOD_KEY_INT
+            if (combo == char(MOD_KEY_INT))
+            {
+                  char key = mygetc(istr);
+                  if ((key >= char(MOD_KEY_BEGIN)) && (key <= char(MOD_KEY_END)))
+                  {
+                        if (mygetc(istr) == MOD_KEY_DUMMY)
+                        {
+                              return returnCh(int(key) + MOD_KEY_FLAG);
+                        }
+                        else return returnCh(UNDEFINED_KEY);
+                  }
+                  else if ((key >= char(ARROW_KEY_BEGIN)) &&
+                        (key <= char(ARROW_KEY_END)))
+                        return returnCh(int(key) + ARROW_KEY_FLAG);
+                  else if (key == char(HOME_TEMP))
+                  {
+                        return returnCh(HOME_KEY);
+                  }
+                  else if (key == char(END_TEMP))
+                  {
+                        return returnCh(END_KEY);
+                  }
+                  else return returnCh(UNDEFINED_KEY);
+            }
+            else { mybeep(); return getChar(istr); }
+      }
+      
 
       // TODO... Check and change if necessary!!!!!!
       // -- The following simple/combo keys are platform-dependent
