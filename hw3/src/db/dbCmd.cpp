@@ -19,8 +19,20 @@ DBJson dbjson;
 bool
 initDbCmd()
 {
-   // TODO...
-   return true;
+   	if(!(	cmdMgr->regCmd("DBAPpend", 4, new DBAppendCmd) &&
+			cmdMgr->regCmd("DBAVerage", 4, new DBAveCmd) &&
+			cmdMgr->regCmd("DBCount", 3, new DBCountCmd) &&
+			cmdMgr->regCmd("DBMAx", 4, new DBMaxCmd) &&
+			cmdMgr->regCmd("DBMIn", 4, new DBMinCmd) &&
+			cmdMgr->regCmd("DBPrint", 3, new DBPrintCmd) &&
+			cmdMgr->regCmd("DBRead", 3, new DBReadCmd) &&
+			cmdMgr->regCmd("DBSOrt", 4, new DBSortCmd) &&
+			cmdMgr->regCmd("DBSUm", 4, new DBSumCmd)))
+	{
+		cerr << "Registering \"init\" commands fails... exiting" << endl;
+      	return false;
+	}
+   	return true;
 }
 
 //----------------------------------------------------------------------
@@ -29,10 +41,42 @@ initDbCmd()
 CmdExecStatus
 DBAppendCmd::exec(const string& option)
 {
-   // TODO...
-   // check option
+	DBJsonElem dbelm;
+	vector<string> options;
+	int num = 0;
 
-   return CMD_EXEC_DONE;
+   	if (!CmdExec::lexOptions(option, options, 2))
+      	return CMD_EXEC_ERROR;
+	
+	for(int i =0; i < options.size(); i++)
+	{
+		if(options[i].empty())
+		{
+			return CmdExec::errorOption(CMD_OPT_MISSING, "");
+		}
+	}
+
+	if(isValidVarName(options[0]) == false)
+	{
+		return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[0]);
+	}
+
+	bool check_1 = myStr2Int(options[1], num);
+	if(check_1 == false)
+	{
+		return CmdExec::errorOption(CMD_OPT_ILLEGAL, options[1]);
+	}
+	else
+	{
+		dbelm.set_key(options[0]);
+		dbelm.set_value(num);
+
+		if(dbjson.add(dbelm) == false)
+		{
+			cerr << "Error: Element with key \"" << options[0] << "\" already exists!!" << endl;
+		}
+	}
+   	return CMD_EXEC_DONE;
 }
 
 void
@@ -197,9 +241,37 @@ DBMinCmd::help() const
 CmdExecStatus
 DBPrintCmd::exec(const string& option)
 {  
-   // TODO...
-
-   return CMD_EXEC_DONE;
+	string token;
+	int counter = 0;
+	int temp_5 = 0;
+	
+	if(!CmdExec::lexSingleOption(option, token))
+      	return CMD_EXEC_ERROR;
+	
+	if(token.size())
+	{
+		for(int i = 0; i < dbjson.size(); i++)
+		{
+			if(token == dbjson[i].key())
+			{
+				counter ++;
+				temp_5 = i;
+			}
+		}
+		if(counter == 1)
+		{
+			cout << "{ " << dbjson[temp_5] << " }" << endl;
+		}
+		else
+		{
+			cerr << "Error: No JSON element with key " << "\"" << token << "\" " << "is found." << endl;
+		}
+	}
+	else
+	{
+		cout << dbjson << endl;
+	}
+   	return CMD_EXEC_DONE;
 }
 
 void

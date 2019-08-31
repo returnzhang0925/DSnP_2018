@@ -17,6 +17,10 @@
 #include <algorithm>
 #include "dbJson.h"
 #include "util.h"
+#include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include "stdlib.h"
 
 using namespace std;
 
@@ -32,18 +36,65 @@ operator << (ostream& os, const DBJsonElem& j)
 
 istream& operator >> (istream& is, DBJson& j)
 {
-   // TODO: to read in data from Json file and store them in a DB 
-   // - You can assume the input file is with correct JSON file format
-   // - NO NEED to handle error file format
-   assert(j._obj.empty());
+    assert(j._obj.empty());
 
-   return is;
+    char line[100];
+	char key_temp[100];
+	char value_temp[100];
+	char *pch;
+    DBJsonElem elem;
+
+    while(is.getline(line,sizeof(line),'\n'))
+    {
+        if(strcmp(line,"}") == NULL)
+        {
+            break;
+        }
+        pch = strtok(line,": \",	");
+        int count = 0;
+
+        while(pch != NULL)
+        {
+            count++;
+            if(count%2 == 1)	
+            {
+                string key(pch);
+                elem.set_key(key);	
+            }
+            else if(count%2 == 0)
+            {
+                string value_1(pch);
+                int value_2;
+                istringstream temp(value_1);
+                temp>>value_2;
+                elem.set_value(value_2);
+                j._obj.push_back(elem);
+            }
+            pch = strtok(NULL,": \",	");
+        }
+    }
+    return is;
 }
 
 ostream& operator << (ostream& os, const DBJson& j)
 {
-   // TODO
-   return os;
+    cout << "{" << endl;
+	for(int i=0;i<j._obj.size();i++)
+	{
+		cout << "  " ;
+        os << j._obj[i];
+		if(i != j._obj.size()-1)
+		{
+			cout << "," << endl;
+		}
+		else
+		{
+			cout << endl;
+		}
+	}
+	cout << "}" << endl;
+    cout << "Total JSON elements: " << j._obj.size();
+    return os;
 }
 
 /**********************************************/
@@ -55,41 +106,107 @@ ostream& operator << (ostream& os, const DBJson& j)
 void
 DBJson::reset()
 {
-   // TODO
+   _obj.clear();
 }
 
 // return false if key is repeated
 bool
 DBJson::add(const DBJsonElem& elm)
 {
-   // TODO
-   return true;
+	int counter_2 = 0;
+	for(int i = 0; i < _obj.size(); i++)
+	{
+		if(elm.key() == _obj[i].key())
+		{
+			counter_2 ++;
+		}
+	}
+	if(counter_2 == 1)
+	{
+		return false;
+	}
+	else
+	{
+		_obj.push_back(elm);
+		return true;
+	}
 }
 
 // return NAN if DBJson is empty
 float
 DBJson::ave() const
 {
-   // TODO
-   return 0.0;
+    if(_obj.empty())
+	{
+		return NAN;
+	}
+	else
+	{
+		double _sum = 0;
+		double _ave = 0;
+		for(int i=0;i<_obj.size();i++)
+		{
+			_sum = _sum + _obj[i].value();
+		}
+		_ave = _sum/(_obj.size());
+		return _ave;
+	}
 }
 
 // If DBJson is empty, set idx to size() and return INT_MIN
 int
 DBJson::max(size_t& idx) const
 {
-   // TODO
-   int maxN = INT_MIN;
-   return  maxN;
+   if(_obj.empty())
+	{
+		idx = _obj.size();
+		int maxN = INT_MIN;
+		return  maxN;
+	}
+	else
+	{
+		int i, temp = 0;
+
+		for (i = 0; i < _obj.size()-1; i++)
+		{
+			if(_obj[temp].value()>_obj[i+1].value())
+			{
+			}
+			else
+			{
+				temp = i+1;
+			}
+		}
+		idx = temp;
+	}
 }
 
 // If DBJson is empty, set idx to size() and return INT_MIN
 int
 DBJson::min(size_t& idx) const
 {
-   // TODO
-   int minN = INT_MAX;
-   return  minN;
+    if(_obj.empty())
+	{	
+		idx = _obj.size();
+		int minN = INT_MAX;
+		return  minN;
+	}
+	else
+	{
+		int i, temp = 0;
+
+		for (i = 0; i < _obj.size()-1; i++)
+		{
+			if(_obj[temp].value()<_obj[i+1].value())
+			{
+			}
+			else
+			{
+				temp = i+1;
+			}
+		}
+		idx = temp;
+	}
 }
 
 void
@@ -110,7 +227,18 @@ DBJson::sort(const DBSortValue& s)
 int
 DBJson::sum() const
 {
-   // TODO
-   int s = 0;
-   return s;
+    if(_obj.empty())
+	{
+		int s = 0;
+		return s;
+	}
+	else
+	{
+		int _sum = 0;
+		for(int i=0;i<_obj.size();i++)
+		{
+			_sum = _sum + _obj[i].value();
+		}
+		return _sum;
+	}
 }

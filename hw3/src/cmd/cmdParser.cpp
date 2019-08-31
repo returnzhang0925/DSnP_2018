@@ -11,6 +11,11 @@
 #include <cstdlib>
 #include "util.h"
 #include "cmdParser.h"
+#include <string>
+#include <cstring>
+#include <sstream>   
+#include <string.h>      
+#include <fstream>
 
 using namespace std;
 
@@ -18,7 +23,17 @@ using namespace std;
 //    External funcitons
 //----------------------------------------------------------------------
 void mybeep();
-
+void mybeep();
+string& trim(string &s) 
+{
+    if (s.empty()) 
+    {
+        return s;
+    }
+    s.erase(0,s.find_first_not_of(" "));
+    s.erase(s.find_last_not_of(" ") + 1);
+    return s;
+}
 
 //----------------------------------------------------------------------
 //    Member Function for class cmdParser
@@ -28,18 +43,40 @@ void mybeep();
 bool
 CmdParser::openDofile(const string& dof)
 {
-   // TODO...
-   _dofile = new ifstream(dof.c_str());
-   return true;
+    if(_dofileStack.size() == 1023)
+    {
+        return false;
+    }
+    else
+    {
+        _dofileStack.push(_dofile);
+        _dofile = new ifstream(dof.c_str());
+    }
+
+    if(!(_dofile->is_open()))
+    {
+        delete _dofile;
+        // _dofile = NULL;
+        _dofile = _dofileStack.top();
+        _dofileStack.pop();
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 // Must make sure _dofile != 0
 void
 CmdParser::closeDofile()
 {
-   assert(_dofile != 0);
-   // TODO...
-   delete _dofile;
+    assert(_dofile != 0);
+	_dofile->close();
+	delete _dofile;
+	// _dofile = 0;
+	_dofile = _dofileStack.top();
+	_dofileStack.pop();
 }
 
 // Return false if registration fails
@@ -97,7 +134,14 @@ CmdParser::execOneCmd()
 void
 CmdParser::printHelps() const
 {
-   // TODO...
+	map<const string, CmdExec*>::iterator iter;
+
+	for(auto iter = _cmdMap.begin(); iter != _cmdMap.end(); iter++)
+	{
+		CmdExec* h = iter->second;
+		h->help();
+	}
+    cout << endl;
 }
 
 void
@@ -134,13 +178,29 @@ CmdParser::printHistory(int nPrint) const
 CmdExec*
 CmdParser::parseCmd(string& option)
 {
-   assert(_tempCmdStored == false);
-   assert(!_history.empty());
-   string str = _history.back();
+    assert(_tempCmdStored == false);
+    assert(!_history.empty());
+    string str = _history.back();
+    CmdExec* s;
 
-   // TODO...
-   assert(str[0] != 0 && str[0] != ' ');
-   return NULL;
+    assert(str[0] != 0 && str[0] != ' ');
+    string token_2;
+    trim(str);
+    istringstream delim(str);
+    getline(delim,token_2,' ');
+
+    if(getCmd(token_2) != 0)
+    {
+        s = getCmd(token_2);
+        option.assign(str, token_2.size(), str.size() - token_2.size());
+        trim(option);
+        return s;
+    }
+    else
+    {
+        cerr << "Illegal command!! \"" << token_2 << "\"" << endl;
+        return NULL;
+    }
 }
 
 // Remove this function for TODO...
@@ -310,9 +370,75 @@ CmdParser::listCmd(const string& str)
 CmdExec*
 CmdParser::getCmd(string cmd)
 {
-   CmdExec* e = 0;
-   // TODO...
-   return e;
+    map<const string, CmdExec*>::iterator iter;
+    CmdExec* e = 0;
+    string temp_3;
+    string temp_2;
+    int size_1 = 0;
+    int size_2 = 0;
+
+    for(auto iter = _cmdMap.begin(); iter != _cmdMap.end(); iter++)
+    {
+        size_1 = iter->first.size();
+
+        if(iter == _cmdMap.end())
+        {
+            if(myStrNCmp(iter->first, cmd, size_1) == 0)
+            {
+                if(cmd.size() > iter->first.size())
+                {
+                    size_2 = cmd.size() - size_1;
+                    temp_3.assign(cmd, size_1, size_2);
+                    if(myStrNCmp(iter->second->getOptCmd(), temp_3, temp_3.size()) == 0)
+                    {
+                        e = iter->second;
+                        return e;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+				else
+				{
+					e = iter->second;
+                    return e;
+				}
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            temp_2.assign(cmd, 0, size_1);
+            if(myStrNCmp(iter->first, temp_2, size_1) == 0)
+            {
+                if(cmd.size() > iter->first.size())
+                {
+                    size_2 = cmd.size() - size_1;
+                    temp_3.assign(cmd, size_1, size_2);
+                    if(myStrNCmp(iter->second->getOptCmd(), temp_3, temp_3.size()) == 0)
+                    {
+                        e = iter->second;
+                        return e;
+                    }
+					else
+					{
+						return 0;
+					}
+                }
+				else
+				{
+					e = iter->second;
+                    return e;
+				}
+            }
+            temp_3.clear();
+        }
+    }
+    return 0;
 }
 
 

@@ -155,6 +155,7 @@ private:
    #endif
 
    // Data members
+  //  bool _flag_1 = false;
    const string _prompt;             // command prompt
    ifstream* _dofile;                // for command script
    char      _readBuf[READ_BUF_SIZE];// save the current line input

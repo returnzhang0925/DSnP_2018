@@ -21,19 +21,28 @@ class DBJsonElem
 {
 public:
    // TODO: define constructor & member functions on your own
-   DBJsonElem() {}
-   DBJsonElem(const string& k, int v): _key(k), _value(v) {}
+	DBJsonElem() {}
+	DBJsonElem(const string& k, int v): _key(k), _value(v) {}
 
-   const string& key() const { return _key; }
-   string& key() { return _key; }
-   const int& value() const { return _value; }
-   int& value() { return _value; }
+	void set_key(string key)
+	{
+		_key = key;
+	}
+	void set_value(int value)
+	{
+		_value = value;
+	}
 
-   friend ostream& operator << (ostream&, const DBJsonElem&);
+	const string& key() const { return _key; }
+	string& key() { return _key; }
+	const int& value() const { return _value; }
+	int& value() { return _value; }
+
+	friend ostream& operator << (ostream&, const DBJsonElem&);
 
 private:
-   string  _key;   // DO NOT change this definition. Use it to store key.
-   int     _value; // DO NOT change this definition. Use it to store value.
+	string  _key;   // DO NOT change this definition. Use it to store key.
+	int     _value; // DO NOT change this definition. Use it to store value.
 };
 
 class DBJson
@@ -58,16 +67,34 @@ public:
 
    // TODO modify these two functions according to the comments
    // return true if JSON file hasn't been read in
-   bool operator !() { return false; }
-   // return this if JSON file has been read in; return NLL if not.
-   operator void* () const { return NULL; }
-
-   // Read DBJson
-   friend istream& operator >> (istream& is, DBJson& j);
-   friend ostream& operator << (ostream& os, const DBJson& j);
+	bool operator !() 
+	{ 
+		if(empty())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	operator void* () const 
+	{
+		if(!empty())
+		{
+			return (void*)this;
+		}
+		else
+		{
+			return NULL; 
+		}
+	}
+   	// Read DBJson
+   	friend istream& operator >> (istream& is, DBJson& j);
+   	friend ostream& operator << (ostream& os, const DBJson& j);
 
 private:
-   vector<DBJsonElem>       _obj;  // DO NOT change this definition.
+   	vector<DBJsonElem>       _obj;  // DO NOT change this definition.
                                    // Use it to store JSON elements.
 };
 
